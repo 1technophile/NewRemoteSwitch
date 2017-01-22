@@ -9,13 +9,18 @@
 
 #include <Arduino.h>
 
+typedef enum SwitchType {
+   off = 0,
+    on = 1,
+    dim = 2       
+  } switchType;
+  
 struct NewRemoteCode {
 	enum SwitchType {
-		off = 0,
-		on = 1,
-		dim = 2				
-	};
-
+   off = 0,
+    on = 1,
+    dim = 2       
+  };
 	unsigned int period;		// Detected duration in microseconds of 1T in the received signal
 	unsigned long address;		// Address of received code. [0..2^26-1]
 	boolean groupBit;			// Group bit set or not
@@ -25,7 +30,15 @@ struct NewRemoteCode {
 	byte dimLevel;				// Dim level [0..15]. Will be available if switchType is dim, on_with_dim or off_with_dim.
 };
 
-typedef void (*NewRemoteReceiverCallBack)(NewRemoteCode);
+#ifdef ESP8266
+#include <functional>
+#define MQTT_CALLBACK_SIGNATURE typedef std::function<void(unsigned int period, unsigned long address)> NewRemoteReceiverCallBack;
+#else
+#define MQTT_CALLBACK_SIGNATURE typedef void (*NewRemoteReceiverCallBack)(NewRemoteCode)
+#endif
+MQTT_CALLBACK_SIGNATURE;
+
+
 
 /**
 * See RemoteSwitch for introduction.
@@ -94,7 +107,6 @@ class NewRemoteReceiver {
 		static void interruptHandler();
 
 	private:
-
 		static int8_t _interrupt;					// Radio input interrupt
 		volatile static short _state;				// State of decoding process.
 		static byte _minRepeats;
