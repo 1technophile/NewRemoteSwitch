@@ -9,6 +9,7 @@
 
 #include <Arduino.h>
 
+
 /**
 * NewRemoteTransmitter provides a generic class for simulation of common RF remote controls, like the A-series
 * 'Klik aan Klik uit'-system (http://www.klikaanklikuit.nl/), used to remotely switch lights etc.

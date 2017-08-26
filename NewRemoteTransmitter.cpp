@@ -6,7 +6,12 @@
  */
 
 #include "NewRemoteTransmitter.h"
-
+#ifdef ESP8266
+    // interrupt handler and related code must be in RAM on ESP8266,
+    #define RECEIVE_ATTR ICACHE_RAM_ATTR
+#else
+    #define RECEIVE_ATTR
+#endif
 
 NewRemoteTransmitter::NewRemoteTransmitter(unsigned long address, byte pin, unsigned int periodusec, byte repeats) {
 	_address = address;

@@ -12,14 +12,14 @@
 typedef enum SwitchType {
    off = 0,
     on = 1,
-    dim = 2       
+    dim = 2
   } switchType;
-  
+
 struct NewRemoteCode {
 	enum SwitchType {
    off = 0,
     on = 1,
-    dim = 2       
+    dim = 2
   };
 	unsigned int period;		// Detected duration in microseconds of 1T in the received signal
 	unsigned long address;		// Address of received code. [0..2^26-1]
@@ -32,12 +32,11 @@ struct NewRemoteCode {
 
 #ifdef ESP8266
 #include <functional>
-#define MQTT_CALLBACK_SIGNATURE typedef std::function<void(unsigned int period, unsigned long address)> NewRemoteReceiverCallBack;
+#define CALLBACK_SIGNATUREH typedef std::function<void(unsigned int period, unsigned long address, unsigned long groupBit, unsigned long unit, unsigned long switchType)> NewRemoteReceiverCallBack
 #else
-#define MQTT_CALLBACK_SIGNATURE typedef void (*NewRemoteReceiverCallBack)(NewRemoteCode)
+#define CALLBACK_SIGNATUREH typedef void (*NewRemoteReceiverCallBack)(NewRemoteCode)
 #endif
-MQTT_CALLBACK_SIGNATURE;
-
+CALLBACK_SIGNATUREH;
 
 
 /**
@@ -56,6 +55,7 @@ MQTT_CALLBACK_SIGNATURE;
 * This is a pure static class, for simplicity and to limit memory-use.
 */
 
+		
 class NewRemoteReceiver {
 	public:
 		/**
@@ -107,6 +107,7 @@ class NewRemoteReceiver {
 		static void interruptHandler();
 
 	private:
+
 		static int8_t _interrupt;					// Radio input interrupt
 		volatile static short _state;				// State of decoding process.
 		static byte _minRepeats;

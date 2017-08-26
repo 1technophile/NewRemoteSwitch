@@ -39,7 +39,7 @@ A full frame looks like this:
 #ifdef ESP8266
     // interrupt handler and related code must be in RAM on ESP8266,
     #define RECEIVE_ATTR ICACHE_RAM_ATTR
-	#define CALLBACK_SIGNATURE (_callback)(receivedCode.period, receivedCode.address)
+	#define CALLBACK_SIGNATURE (_callback)(receivedCode.period, receivedCode.address, receivedCode.groupBit, receivedCode.unit, receivedCode.switchType)
 #else
     #define RECEIVE_ATTR
 	#define CALLBACK_SIGNATURE (_callback)(receivedCode)
@@ -84,7 +84,7 @@ void RECEIVE_ATTR NewRemoteReceiver::interruptHandler() {
 	// methods would certainly increase the readability, it would also be much slower to execute.
 	// Making calls to other methods is quite expensive on AVR. As These interrupt handlers are called
 	// many times a second, calling other methods should be kept to a minimum.
-	
+
 	if (!_enabled) {
 		return;
 	}
@@ -172,7 +172,7 @@ void RECEIVE_ATTR NewRemoteReceiver::interruptHandler() {
 					// mark received switch signal as signal-with-dim
                     receivedCode.dimLevelPresent = true;
 				}
-				
+
 				// a valid signal was found!
 				if (
 						receivedCode.address != previousCode.address ||
@@ -185,9 +185,9 @@ void RECEIVE_ATTR NewRemoteReceiver::interruptHandler() {
 					repeats=0;
 					previousCode = receivedCode;
 				}
-				
+
 				repeats++;
-				
+
 				if (repeats>=_minRepeats) {
 					if (!_inCallback) {
 						_inCallback = true;
@@ -198,11 +198,11 @@ void RECEIVE_ATTR NewRemoteReceiver::interruptHandler() {
 					RESET_STATE;
 					return;
 				}
-				
+
 				// Reset for next round
 				_state=0; // no need to wait for another sync-bit!
 				return;
-		}		
+		}
 		else { // Otherwise the entire sequence is invalid
 			RESET_STATE;
 			return;
@@ -278,7 +278,7 @@ void RECEIVE_ATTR NewRemoteReceiver::interruptHandler() {
 						RESET_STATE;
 						return;
 				}
-				
+
 			} else if (_state < 146) {
 				// States 130 - 145 are dim bit states.
                 // Depending on hardware, these bits can be present, even if switchType is NewRemoteCode::on or NewRemoteCode::off
