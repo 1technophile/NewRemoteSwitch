@@ -34,7 +34,7 @@ struct NewRemoteCode {
 #include <functional>
 #define CALLBACK_SIGNATUREH typedef std::function<void(unsigned int period, unsigned long address, unsigned long groupBit, unsigned long unit, unsigned long switchType)> NewRemoteReceiverCallBack
 #else
-#define CALLBACK_SIGNATUREH typedef void (*NewRemoteReceiverCallBack)(NewRemoteCode)
+#define CALLBACK_SIGNATUREH typedef void (*NewRemoteReceiverCallBack)(unsigned int period, unsigned long address, unsigned long groupBit, unsigned long unit, unsigned long switchType)
 #endif
 CALLBACK_SIGNATUREH;
 
