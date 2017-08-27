@@ -42,7 +42,7 @@ A full frame looks like this:
 	#define CALLBACK_SIGNATURE (_callback)(receivedCode.period, receivedCode.address, receivedCode.groupBit, receivedCode.unit, receivedCode.switchType)
 #else
     #define RECEIVE_ATTR
-	#define CALLBACK_SIGNATURE (_callback)(receivedCode)
+	#define CALLBACK_SIGNATURE (_callback)(receivedCode.period, receivedCode.address, receivedCode.groupBit, receivedCode.unit, receivedCode.switchType)
 #endif
 
 int8_t NewRemoteReceiver::_interrupt;
