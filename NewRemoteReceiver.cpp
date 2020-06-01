@@ -122,7 +122,7 @@ void RECEIVE_ATTR NewRemoteReceiver::interruptHandler() {
 		// wait for the long low part of a stop bit.
 		// Stopbit: 1T high, 40T low
 		// By default 1T is 260µs, but for maximum compatibility go as low as 120µs
-		if (duration > 4800) { // =40*120µs, minimal time between two edges before decoding starts.
+		if (duration > 4800 && duration < 15000) { // =40*120µs, minimal time between two edges before decoding starts.
 			// Sync signal received.. Preparing for decoding
 			repeats = 0;
 
