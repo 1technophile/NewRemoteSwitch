@@ -38,7 +38,7 @@ void loop() {
 }
 
 // Callback function is called only when a valid code is received.
-void showCode(unsigned int period, unsigned long address, unsigned long groupBit, unsigned long unit, unsigned long switchType) {
+void showCode(unsigned int period, unsigned long address, unsigned long groupBit, unsigned long unit, unsigned long switchType, boolean dimLevelPresent, byte dimLevel) {
 
   // Print the received code.
   Serial.print("Code: ");
@@ -51,5 +51,10 @@ void showCode(unsigned int period, unsigned long address, unsigned long groupBit
   Serial.println(groupBit);
   Serial.print(" switchType: ");
   Serial.println(switchType);
+
+  if (dimLevelPresent){
+    Serial.print(" dimLevel: ");
+    Serial.println(dimLevel);    
+  }
 
 }
