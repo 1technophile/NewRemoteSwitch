@@ -39,16 +39,20 @@ A full frame looks like this:
 #ifdef ESP8266
     // interrupt handler and related code must be in RAM on ESP8266,
     #define RECEIVE_ATTR ICACHE_RAM_ATTR
-	#define CALLBACK_SIGNATURE (_callback)(receivedCode.period, receivedCode.address, receivedCode.groupBit, receivedCode.unit, receivedCode.switchType)
+	#define CALLBACK_SIGNATURE (_callback)(receivedCode.period, receivedCode.address, receivedCode.groupBit, receivedCode.unit, receivedCode.switchType, receivedCode.dimLevelPresent, receivedCode.dimLevel)
 #else
     #define RECEIVE_ATTR
-	#define CALLBACK_SIGNATURE (_callback)(receivedCode.period, receivedCode.address, receivedCode.groupBit, receivedCode.unit, receivedCode.switchType)
+	#define CALLBACK_SIGNATURE (_callback)(receivedCode.period, receivedCode.address, receivedCode.groupBit, receivedCode.unit, receivedCode.switchType, receivedCode.dimLevelPresent, receivedCode.dimLevel)
 #endif
 
 int8_t NewRemoteReceiver::_interrupt;
 volatile short NewRemoteReceiver::_state;
 byte NewRemoteReceiver::_minRepeats;
 NewRemoteReceiverCallBack NewRemoteReceiver::_callback;
+
+NewRemoteReceiverCallBackStruct NewRemoteReceiver::_callback_struct;	// Variable to store the pointer to callback function with NewRemoteCode struct as parameter
+boolean NewRemoteReceiver::_isCallbackStruct = false;               	// Flag to switch which callback function call at receive code
+
 boolean NewRemoteReceiver::_inCallback = false;
 boolean NewRemoteReceiver::_enabled = false;
 
@@ -56,6 +60,19 @@ void NewRemoteReceiver::init(int8_t interrupt, byte minRepeats, NewRemoteReceive
 	_interrupt = interrupt;
 	_minRepeats = minRepeats;
 	_callback = callback;
+
+	enable();
+	if (_interrupt >= 0) {
+		attachInterrupt(_interrupt, interruptHandler, CHANGE);
+	}
+}
+
+// Overload init() to support a callback function with NewRemoteCode struct as parameter
+void NewRemoteReceiver::init(int8_t interrupt, byte minRepeats, NewRemoteReceiverCallBackStruct callback){
+	_interrupt = interrupt;
+	_minRepeats = minRepeats;
+	_callback_struct = callback;
+	_isCallbackStruct = true;
 
 	enable();
 	if (_interrupt >= 0) {
@@ -191,7 +208,16 @@ void RECEIVE_ATTR NewRemoteReceiver::interruptHandler() {
 				if (repeats>=_minRepeats) {
 					if (!_inCallback) {
 						_inCallback = true;
-						CALLBACK_SIGNATURE;
+
+						// If flag is set to callback function call at receive code
+						if (_isCallbackStruct){
+							// Call to callback function with NewRemoteCode struct as parameter
+							(_callback_struct)(receivedCode);
+						}else{
+							// Call to callback function with discrete parameters
+							CALLBACK_SIGNATURE;
+						}
+
 						_inCallback = false;
 					}
 					// Reset after callback.

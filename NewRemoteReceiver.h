@@ -32,11 +32,16 @@ struct NewRemoteCode {
 
 #ifdef ESP8266
 #include <functional>
-#define CALLBACK_SIGNATUREH typedef std::function<void(unsigned int period, unsigned long address, unsigned long groupBit, unsigned long unit, unsigned long switchType)> NewRemoteReceiverCallBack
+#define CALLBACK_SIGNATUREH typedef std::function<void(unsigned int period, unsigned long address, unsigned long groupBit, unsigned long unit, unsigned long switchType, boolean dimLevelPresent, byte dimLevel)> NewRemoteReceiverCallBack
+// Type definition for callback function with NewRemoteCode struct as parameter
+#define CALLBACK_SIGNATURE_STRUCTH typedef std::function<void(NewRemoteCode receivedCode)> NewRemoteReceiverCallBackStruct
 #else
-#define CALLBACK_SIGNATUREH typedef void (*NewRemoteReceiverCallBack)(unsigned int period, unsigned long address, unsigned long groupBit, unsigned long unit, unsigned long switchType)
+#define CALLBACK_SIGNATUREH typedef void (*NewRemoteReceiverCallBack)(unsigned int period, unsigned long address, unsigned long groupBit, unsigned long unit, unsigned long switchType, boolean dimLevelPresent, byte dimLevel)
+// Type definition for callback function with NewRemoteCode struct as parameter
+#define CALLBACK_SIGNATURE_STRUCTH typedef void(*NewRemoteReceiverCallBackStruct)(NewRemoteCode)
 #endif
 CALLBACK_SIGNATUREH;
+CALLBACK_SIGNATURE_STRUCTH;
 
 
 /**
@@ -66,11 +71,17 @@ class NewRemoteReceiver {
 		* yourself whenever the output of the receiver changes, or you can use InterruptChain.
 		*
 		* @param interrupt 	The interrupt as is used by Arduino's attachInterrupt function. See attachInterrupt for details.
-							If < 0, you must call interruptHandler() yourself.
+		 					If < 0, you must call interruptHandler() yourself.
 		* @param minRepeats The number of times the same code must be received in a row before the callback is calles
-		* @param callback Pointer to a callback function, with signature void (*func)(NewRemoteCode)
+		* @param callback   Pointer to a callback function, with two possible signatures depending on init()'s call:
+		 					 - void (*func)(unsigned int period, unsigned long address, unsigned long groupBit, unsigned long unit, unsigned long switchType, boolean dimLevelPresent, byte dimLevel)
+		 					 - void (*func)(NewRemoteCode receivedCode)
 		*/
-		static void init(int8_t interrupt, byte minRepeats, NewRemoteReceiverCallBack callback);
+
+		static void init(int8_t interrupt, byte minRepeats, NewRemoteReceiverCallBack callback);		
+
+		// Overload init() to support a callback function with NewRemoteCode struct as parameter
+		static void init(int8_t interrupt, byte minRepeats, NewRemoteReceiverCallBackStruct callback);  
 
 		/**
 		* Enable decoding. No need to call enable() after init().
@@ -112,6 +123,10 @@ class NewRemoteReceiver {
 		volatile static short _state;				// State of decoding process.
 		static byte _minRepeats;
 		static NewRemoteReceiverCallBack _callback;
+		
+		static NewRemoteReceiverCallBackStruct _callback_struct; // Variable to store the pointer to callback function with NewRemoteCode struct as parameter
+		static boolean _isCallbackStruct;			// Flag to switch which callback function call at receive code
+
 		static boolean _inCallback;					// When true, the callback function is being executed; prevents re-entrance.
 		static boolean _enabled;					// If true, monitoring and decoding is enabled. If false, interruptHandler will return immediately.
 
