@@ -2,7 +2,7 @@
  * Demo for RF remote switch receiver.
  * For details, see NewRemoteReceiver.h!
  *
- * Connect the transmitter to digital pin 11.
+ * Connect the transmitter to digital pin 11 on Arduino or pin 4 on ESP8266 and ESP32.
  *
  * This sketch demonstrates the use of the NewRemoteTransmitter class.
  *
@@ -19,10 +19,14 @@
 
 #include <NewRemoteTransmitter.h>
 
-// Create a transmitter on address 123, using digital pin 11 to transmit, 
+// Create a transmitter on address 123, using a digital pin to transmit, 
 // with a period duration of 260ms (default), repeating the transmitted
 // code 2^3=8 times.
+#if defined ESP8266 || defined ESP32
+NewRemoteTransmitter transmitter(123, 4, 260, 3);
+#else
 NewRemoteTransmitter transmitter(123, 11, 260, 3);
+#endif
 
 void setup() {
 }
