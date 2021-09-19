@@ -36,14 +36,17 @@ A full frame looks like this:
 
 ************/
 
-#ifdef ESP8266
+#if defined ESP8266 
     // interrupt handler and related code must be in RAM on ESP8266,
     #define RECEIVE_ATTR ICACHE_RAM_ATTR
-	#define CALLBACK_SIGNATURE (_callback)(receivedCode.period, receivedCode.address, receivedCode.groupBit, receivedCode.unit, receivedCode.switchType, receivedCode.dimLevelPresent, receivedCode.dimLevel)
+#elif defined ESP32
+	// interrupt handler and related code must be in RAM on ESP32	
+	#define RECEIVE_ATTR IRAM_ATTR
 #else
     #define RECEIVE_ATTR
-	#define CALLBACK_SIGNATURE (_callback)(receivedCode.period, receivedCode.address, receivedCode.groupBit, receivedCode.unit, receivedCode.switchType, receivedCode.dimLevelPresent, receivedCode.dimLevel)
 #endif
+
+#define CALLBACK_SIGNATURE (_callback)(receivedCode.period, receivedCode.address, receivedCode.groupBit, receivedCode.unit, receivedCode.switchType, receivedCode.dimLevelPresent, receivedCode.dimLevel)
 
 int8_t NewRemoteReceiver::_interrupt;
 volatile short NewRemoteReceiver::_state;

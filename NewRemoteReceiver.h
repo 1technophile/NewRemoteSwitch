@@ -30,7 +30,7 @@ struct NewRemoteCode {
 	byte dimLevel;				// Dim level [0..15]. Will be available if switchType is dim, on_with_dim or off_with_dim.
 };
 
-#ifdef ESP8266
+#if defined ESP8266 || defined ESP32
 #include <functional>
 #define CALLBACK_SIGNATUREH typedef std::function<void(unsigned int period, unsigned long address, unsigned long groupBit, unsigned long unit, unsigned long switchType, boolean dimLevelPresent, byte dimLevel)> NewRemoteReceiverCallBack
 // Type definition for callback function with NewRemoteCode struct as parameter
